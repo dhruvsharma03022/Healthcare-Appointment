@@ -7,18 +7,32 @@ const {
     cancelAppointment,
     getDoctorAppointments,
     updateAppointmentStatus,
-    getAllAppointments
+    getAllAppointments,
+    getPatientAppointments,
+    getAvailableSlots,
+    getMyAppointmentHistory
 } = require("../controllers/appointmentController");
 const {
     protect,
     authorize
 } = require("../middleware/authMiddleware");
-
+router.get(
+    "/patient/:patientId",
+    protect,
+    authorize("ADMIN"),
+    getPatientAppointments
+);
 router.post(
     "/",
     protect,
     authorize("PATIENT"),
     bookAppointment
+);
+router.get(
+    "/my/history",
+    protect,
+    authorize("PATIENT"),
+    getMyAppointmentHistory
 );
 router.get(
     "/my",
@@ -29,19 +43,25 @@ router.get(
 router.put(
     "/:id/cancel",
     protect,
-    authorize("PATIENT"),
+    authorize("PATIENT", "ADMIN"),
     cancelAppointment
+);
+router.get(
+    "/doctor/:doctorId/available-slots",
+    protect,
+    authorize("PATIENT"),
+    getAvailableSlots
 );
 router.get(
     "/doctor/:doctorId",
     protect,
-    authorize("ADMIN"),
+    authorize("ADMIN","DOCTOR"),
     getDoctorAppointments
 );
 router.put(
     "/:id/status",
     protect,
-    authorize("ADMIN"),
+    authorize("ADMIN","DOCTOR"),
     updateAppointmentStatus
 );
 router.get(
@@ -50,4 +70,5 @@ router.get(
     authorize("ADMIN"),
     getAllAppointments
 );
+
 module.exports = router;

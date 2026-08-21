@@ -1,7 +1,9 @@
 const express = require("express");
 const cors = require("cors");
+const patientRoutes = require("./routes/patientRoutes");
 const authRoutes = require("./routes/authRoutes");
 const appointmentRoutes = require("./routes/appointmentRoutes");
+const prescriptionRoutes = require("./routes/prescriptionRoutes");
 const doctorRoutes =
 require("./routes/doctorRoutes");
 require("dotenv").config();
@@ -13,9 +15,14 @@ require("./routes/adminRoutes");
 connectDB();
 app.use(cors());
 app.use(express.json());
+app.use(
+    "/api/prescriptions",
+    prescriptionRoutes
+);
 app.use("/api/appointments", appointmentRoutes);
 app.use("/api/auth", authRoutes);
 app.use("/api/admin", adminRoutes);
+app.use("/api/patients", patientRoutes);
 app.use("/api/doctors", doctorRoutes);
 app.get("/", (req, res) => {
     res.send("Healthcare API Running");

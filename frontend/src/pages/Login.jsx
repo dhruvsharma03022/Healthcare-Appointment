@@ -42,11 +42,13 @@ function Login() {
       );
 
       // Redirect based on role
-      if (data.user.role === "ADMIN") {
-        navigate("/admin");
-      } else {
-        navigate("/patient");
-      }
+     if (data.user.role === "ADMIN") {
+  navigate("/admin");
+} else if (data.user.role === "DOCTOR") {
+  navigate("/doctor");
+} else {
+  navigate("/patient");
+}
 
     } catch (error) {
       console.error(error);

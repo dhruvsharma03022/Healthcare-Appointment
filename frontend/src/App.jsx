@@ -7,6 +7,15 @@ import AdminDashboard from "./pages/AdminDashboard";
 import ProtectedRoute from "./components/ProtectedRoute";
 import Doctors from "./pages/Doctors";
 import BookAppointment from "./pages/bookappointment";
+import MyAppointments from "./pages/MyAppointments";
+import AdminAppointments from "./pages/AdminAppointments";
+import AdminDoctors from "./pages/AdminDoctors";
+import AdminPatients from "./pages/AdminPatients";
+import PatientAppointments from "./pages/PatientAppointments";
+import DoctorDashboard from "./pages/DoctorDashboard";
+import CreatePrescription from "./pages/CreatePrescription";
+import PatientPrescriptions from "./pages/PatientPrescriptions";
+import AppointmentHistory from "./pages/AppointmentHistory";
 function Home() {
   return <h1>Healthcare Manager</h1>;
 }
@@ -16,7 +25,18 @@ function App() {
     <BrowserRouter>
       <Routes>
         <Route path="/" element={<Home />} />
-
+        <Route
+  path="/admin/appointments"
+  element={
+    <ProtectedRoute allowedRole="ADMIN">
+      <AdminAppointments />
+    </ProtectedRoute>
+  }
+/>
+<Route
+  path="/patient/appointment-history"
+  element={<AppointmentHistory />}
+/>
         <Route path="/login" element={<Login />} />
 
         <Route path="/register" element={<Register />} />
@@ -26,6 +46,42 @@ function App() {
           element={
             <ProtectedRoute allowedRole="PATIENT">
               <PatientDashboard />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+  path="/doctor"
+  element={<DoctorDashboard />}
+/>
+<Route
+  path="/patient/prescriptions"
+  element={<PatientPrescriptions />}
+/>
+<Route
+  path="/doctor/prescription/:appointmentId"
+  element={<CreatePrescription />}
+/>
+        <Route
+  path="/admin/patients/:patientId/appointments"
+  element={
+    <ProtectedRoute allowedRole="ADMIN">
+      <PatientAppointments />
+    </ProtectedRoute>
+  }
+/>
+              <Route
+          path="/admin/doctors"
+          element={
+            <ProtectedRoute allowedRole="ADMIN">
+              <AdminDoctors />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/admin/patients"
+          element={
+            <ProtectedRoute allowedRole="ADMIN">
+              <AdminPatients />
             </ProtectedRoute>
           }
         />
@@ -45,6 +101,15 @@ function App() {
     </ProtectedRoute>
   }
 />
+      <Route
+  path="/my-appointments"
+  element={
+    <ProtectedRoute allowedRole="PATIENT">
+      <MyAppointments />
+    </ProtectedRoute>
+  }
+/>
+
         <Route
           path="/admin"
           element={

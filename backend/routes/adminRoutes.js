@@ -5,7 +5,8 @@ const { protect, authorize } =
 require("../middleware/authMiddleware");
 
 const {
-    adminDashboard
+    adminDashboard,
+    getAllPatients
 } = require("../controllers/adminController");
 
 router.get(
@@ -15,4 +16,10 @@ router.get(
     adminDashboard
 );
 
+router.get(
+    "/patients",
+    protect,
+    authorize("ADMIN"),
+    getAllPatients
+);
 module.exports = router;
