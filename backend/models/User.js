@@ -21,7 +21,15 @@ const userSchema = new mongoose.Schema({
         type: String,
         enum: ["PATIENT", "DOCTOR", "ADMIN"],
         default: "PATIENT"
-    }
+    },
+    resetPasswordToken: {
+    type: String
+},
+
+resetPasswordExpires: {
+    type: Date
+}
+    
 });
 
 module.exports = mongoose.model("User", userSchema);

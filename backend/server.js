@@ -1,3 +1,4 @@
+require("dotenv").config();
 const express = require("express");
 const cors = require("cors");
 const patientRoutes = require("./routes/patientRoutes");
@@ -6,7 +7,6 @@ const appointmentRoutes = require("./routes/appointmentRoutes");
 const prescriptionRoutes = require("./routes/prescriptionRoutes");
 const doctorRoutes =
 require("./routes/doctorRoutes");
-require("dotenv").config();
 
 const app = express();
 const connectDB = require("./config/db");

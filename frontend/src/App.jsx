@@ -16,6 +16,8 @@ import DoctorDashboard from "./pages/DoctorDashboard";
 import CreatePrescription from "./pages/CreatePrescription";
 import PatientPrescriptions from "./pages/PatientPrescriptions";
 import AppointmentHistory from "./pages/AppointmentHistory";
+import ForgotPassword from "./pages/ForgotPassword";
+import ResetPassword from "./pages/ResetPassword";
 function Home() {
   return <h1>Healthcare Manager</h1>;
 }
@@ -34,8 +36,16 @@ function App() {
   }
 />
 <Route
+  path="/forgot-password"
+  element={<ForgotPassword />}
+/>
+<Route
   path="/patient/appointment-history"
   element={<AppointmentHistory />}
+/>
+<Route
+  path="/reset-password/:token"
+  element={<ResetPassword />}
 />
         <Route path="/login" element={<Login />} />
 

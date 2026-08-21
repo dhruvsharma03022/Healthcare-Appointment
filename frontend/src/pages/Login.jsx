@@ -99,11 +99,17 @@ function Login() {
         </form>
 
         <p className="register-text">
-          Don't have an account?{" "}
-          <Link to="/register">
-            Register
-          </Link>
-        </p>
+  <Link to="/forgot-password">
+    Forgot Password?
+  </Link>
+</p>
+
+<p className="register-text">
+  Don't have an account?{" "}
+  <Link to="/register">
+    Register
+  </Link>
+</p>
 
       </div>
     </div>

@@ -1,21 +1,22 @@
 import { useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { Link, useParams, useNavigate } from "react-router-dom";
 
-function Register() {
+function ResetPassword() {
+  const { token } = useParams();
   const navigate = useNavigate();
 
-  const [name, setName] = useState("");
-  const [email, setEmail] = useState("");
-  const [phone, setPhone] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] =
     useState("");
 
+  const [message, setMessage] = useState("");
   const [error, setError] = useState("");
+  const [loading, setLoading] = useState(false);
 
-  const handleRegister = async (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
 
+    setMessage("");
     setError("");
 
     // Password validation
@@ -53,21 +54,17 @@ function Register() {
     }
 
     try {
-      const response = await fetch(
-        "http://localhost:5000/api/auth/register",
-        {
-          method: "POST",
+      setLoading(true);
 
+      const response = await fetch(
+        `http://localhost:5000/api/auth/reset-password/${token}`,
+        {
+          method: "PUT",
           headers: {
             "Content-Type": "application/json",
           },
-
           body: JSON.stringify({
-            name,
-            email,
             password,
-            phone,
-            role: "PATIENT",
           }),
         }
       );
@@ -75,31 +72,31 @@ function Register() {
       const data = await response.json();
 
       if (!response.ok) {
-        setError(
-          data.message || "Registration failed"
+        throw new Error(
+          data.message || "Password reset failed"
         );
-        return;
       }
 
-      // Save login information
-      localStorage.setItem(
-        "token",
-        data.token
+      setMessage(
+        "Password reset successfully!"
       );
 
-      localStorage.setItem(
-        "user",
-        JSON.stringify(data.user)
-      );
+      setPassword("");
+      setConfirmPassword("");
 
-      navigate("/patient");
+      setTimeout(() => {
+        navigate("/login");
+      }, 2000);
 
     } catch (error) {
       console.error(error);
 
       setError(
-        "Something went wrong. Please try again."
+        error.message ||
+          "Something went wrong"
       );
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -108,11 +105,17 @@ function Register() {
 
       <div className="login-card">
 
-        <h1>Create Account</h1>
+        <h1>Reset Password</h1>
 
         <p className="subtitle">
-          Register for Healthcare Manager
+          Create a new password for your account.
         </p>
+
+        {message && (
+          <p className="success-message">
+            {message}
+          </p>
+        )}
 
         {error && (
           <p className="error-message">
@@ -120,63 +123,15 @@ function Register() {
           </p>
         )}
 
-        <form onSubmit={handleRegister}>
+        <form onSubmit={handleSubmit}>
 
           <div className="form-group">
 
-            <label>Full Name</label>
-
-            <input
-              type="text"
-              placeholder="Enter your full name"
-              value={name}
-              onChange={(e) =>
-                setName(e.target.value)
-              }
-              required
-            />
-
-          </div>
-
-          <div className="form-group">
-
-            <label>Email</label>
-
-            <input
-              type="email"
-              placeholder="Enter your email"
-              value={email}
-              onChange={(e) =>
-                setEmail(e.target.value)
-              }
-              required
-            />
-
-          </div>
-
-          <div className="form-group">
-
-            <label>Phone Number</label>
-
-            <input
-              type="tel"
-              placeholder="Enter your phone number"
-              value={phone}
-              onChange={(e) =>
-                setPhone(e.target.value)
-              }
-              required
-            />
-
-          </div>
-
-          <div className="form-group">
-
-            <label>Password</label>
+            <label>New Password</label>
 
             <input
               type="password"
-              placeholder="Create a password"
+              placeholder="Enter new password"
               value={password}
               onChange={(e) =>
                 setPassword(e.target.value)
@@ -192,7 +147,7 @@ function Register() {
 
             <input
               type="password"
-              placeholder="Confirm your password"
+              placeholder="Confirm new password"
               value={confirmPassword}
               onChange={(e) =>
                 setConfirmPassword(
@@ -204,14 +159,19 @@ function Register() {
 
           </div>
 
-          <button type="submit">
-            Create Account
+          <button
+            type="submit"
+            disabled={loading}
+          >
+            {loading
+              ? "Resetting..."
+              : "Reset Password"}
           </button>
 
         </form>
 
         <p className="register-text">
-          Already have an account?{" "}
+          Remember your password?{" "}
           <Link to="/login">
             Login
           </Link>
@@ -223,4 +183,4 @@ function Register() {
   );
 }
 
-export default Register;
+export default ResetPassword;
