@@ -23,7 +23,45 @@ const appointmentSchema = new mongoose.Schema(
             type: String,
             required: true
         },
+        clinicalNotes: {
+    type: String
+},
+        // AI-generated pre-visit summary
+        preVisitSummary: {
+            urgency: {
+                type: String,
+                enum: ["Low", "Medium", "High"]
+            },
 
+            chiefComplaint: {
+                type: String
+            },
+
+            suggestedQuestions: [
+                {
+                    type: String
+                }
+            ]
+        },
+postVisitSummary: {
+    summary: {
+        type: String
+    },
+
+    medicationSchedule: [
+        {
+            medicine: String,
+            dosage: String,
+            duration: String
+        }
+    ],
+
+    followUpSteps: [
+        {
+            type: String
+        }
+    ]
+},
         status: {
             type: String,
             enum: [

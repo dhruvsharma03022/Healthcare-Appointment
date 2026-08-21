@@ -335,17 +335,57 @@ function DoctorDashboard() {
                     ).toLocaleString()}
                   </p>
 
-                  <p>
-                    <strong>
-                      Symptoms:
-                    </strong>{" "}
-                    {appointment.symptoms}
-                  </p>
+                <p>
+  <strong>
+    Symptoms:
+  </strong>{" "}
+  {appointment.symptoms}
+</p>
 
-                  <p>
-                    <strong>
-                      Status:
-                    </strong>{" "}
+{/* AI PRE-VISIT SUMMARY */}
+
+{appointment.preVisitSummary && (
+  <div className="pre-visit-summary">
+
+    <h4>AI Pre-Visit Summary</h4>
+
+    <p>
+      <strong>Urgency:</strong>{" "}
+      <span
+        className={`urgency-${appointment.preVisitSummary.urgency?.toLowerCase()}`}
+      >
+        {appointment.preVisitSummary.urgency}
+      </span>
+    </p>
+
+    <p>
+      <strong>Chief Complaint:</strong>{" "}
+      {appointment.preVisitSummary.chiefComplaint}
+    </p>
+
+    {appointment.preVisitSummary.suggestedQuestions?.length > 0 && (
+      <div>
+        <strong>Suggested Questions:</strong>
+
+        <ol>
+          {appointment.preVisitSummary.suggestedQuestions.map(
+            (question, index) => (
+              <li key={index}>
+                {question}
+              </li>
+            )
+          )}
+        </ol>
+      </div>
+    )}
+
+  </div>
+)}
+
+<p>
+  <strong>
+    Status:
+  </strong>{" "}
                     <span
                       className={`status-badge ${appointment.status.toLowerCase()}`}
                     >

@@ -1,6 +1,8 @@
 const Appointment = require("../models/Appointment");
 const Doctor = require("../models/Doctor");
-
+const {
+    generatePreVisitSummary
+} = require("../services/llmService");
 exports.bookAppointment = async (req, res) => {
     try {
         const {
@@ -31,96 +33,144 @@ exports.bookAppointment = async (req, res) => {
                 message: "Doctor is on leave on this date"
             });
         }
-        const appointmentDateTime = new Date(appointmentTime);
+
+        // 3. Check appointment is not in the past
+        const appointmentDateTime =
+            new Date(appointmentTime);
+
         if (appointmentDateTime <= new Date()) {
-    return res.status(400).json({
-        message: "Cannot book an appointment in the past"
-    });
-}
+            return res.status(400).json({
+                message:
+                    "Cannot book an appointment in the past"
+            });
+        }
 
-const appointmentHours =
-    appointmentDateTime.getHours();
+        // 4. Check doctor's working hours
+        const appointmentHours =
+            appointmentDateTime.getHours();
 
-const appointmentMinutes =
-    appointmentDateTime.getMinutes();
+        const appointmentMinutes =
+            appointmentDateTime.getMinutes();
 
-const appointmentTotalMinutes =
-    appointmentHours * 60 + appointmentMinutes;
+        const appointmentTotalMinutes =
+            appointmentHours * 60 +
+            appointmentMinutes;
 
-const [startHour, startMinute] =
-    doctor.workingHours.start
-        .split(":")
-        .map(Number);
+        const [startHour, startMinute] =
+            doctor.workingHours.start
+                .split(":")
+                .map(Number);
 
-const [endHour, endMinute] =
-    doctor.workingHours.end
-        .split(":")
-        .map(Number);
+        const [endHour, endMinute] =
+            doctor.workingHours.end
+                .split(":")
+                .map(Number);
 
-const startTotalMinutes =
-    startHour * 60 + startMinute;
+        const startTotalMinutes =
+            startHour * 60 + startMinute;
 
-const endTotalMinutes =
-    endHour * 60 + endMinute;
+        const endTotalMinutes =
+            endHour * 60 + endMinute;
 
-if (
-    appointmentTotalMinutes < startTotalMinutes ||
-    appointmentTotalMinutes >= endTotalMinutes
-) {
-    return res.status(400).json({
-        message: "Appointment time is outside doctor's working hours"
-    });
-}
-const slotDuration = doctor.slotDuration;
+        if (
+            appointmentTotalMinutes <
+                startTotalMinutes ||
+            appointmentTotalMinutes >=
+                endTotalMinutes
+        ) {
+            return res.status(400).json({
+                message:
+                    "Appointment time is outside doctor's working hours"
+            });
+        }
 
-const minutesFromStart =
-    appointmentTotalMinutes - startTotalMinutes;
+        // 5. Check slot duration
+        const slotDuration =
+            doctor.slotDuration;
 
-if (minutesFromStart % slotDuration !== 0) {
-    return res.status(400).json({
-        message: `Appointment time must be in ${slotDuration}-minute slots`
-    });
-}
-        // 3. Check if slot is already booked
+        const minutesFromStart =
+            appointmentTotalMinutes -
+            startTotalMinutes;
+
+        if (
+            minutesFromStart %
+            slotDuration !== 0
+        ) {
+            return res.status(400).json({
+                message:
+                    `Appointment time must be in ${slotDuration}-minute slots`
+            });
+        }
+
+        // 6. Check if slot already booked
         const existingAppointment =
             await Appointment.findOne({
                 doctor: doctorId,
-                appointmentTime: new Date(appointmentTime),
+                appointmentTime:
+                    new Date(appointmentTime),
                 status: "BOOKED"
             });
 
         if (existingAppointment) {
             return res.status(400).json({
-                message: "This appointment slot is already booked"
+                message:
+                    "This appointment slot is already booked"
             });
         }
 
-        // Temporary response
-        const appointment = await Appointment.create({
-    patient: patientId,
-    doctor: doctorId,
-    appointmentTime: new Date(appointmentTime),
-    symptoms,
-    status: "BOOKED"
-});
+        // 7. Generate PRE-VISIT summary
+        let preVisitSummary = null;
 
-res.status(201).json({
-    message: "Appointment booked successfully",
-    appointment
-});
+        try {
+            preVisitSummary =
+                await generatePreVisitSummary(
+                    symptoms
+                );
+        } catch (error) {
+            console.error(
+                "Pre-visit summary generation failed:",
+                error.message
+            );
+        }
+
+        // 8. Create appointment
+        const appointment =
+            await Appointment.create({
+                patient: patientId,
+                doctor: doctorId,
+                appointmentTime:
+                    new Date(appointmentTime),
+                symptoms,
+                preVisitSummary,
+                status: "BOOKED"
+            });
+
+        res.status(201).json({
+            message:
+                "Appointment booked successfully",
+            appointment
+        });
 
     } catch (error) {
-    if (error.code === 11000) {
-        return res.status(400).json({
-            message: "This appointment slot is already booked"
+
+        if (error.code === 11000) {
+            return res.status(400).json({
+                message:
+                    "This appointment slot is already booked"
+            });
+        }
+
+        console.error(
+            "Appointment booking error:",
+            error
+        );
+
+        res.status(500).json({
+            message: error.message
         });
     }
-
-    res.status(500).json({
-        message: error.message
-    });
-}
-};exports.getMyAppointments = async (req, res) => {
+};
+exports.getMyAppointments = async (req, res) => {
     try {
         const appointments = await Appointment.find({
             patient: req.user._id,

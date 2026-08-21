@@ -1,17 +1,20 @@
 const Prescription = require("../models/Prescription");
 const Doctor = require("../models/Doctor");
 const Appointment = require("../models/Appointment");
-
+const {
+    generatePostVisitSummary
+} = require("../services/llmService");
 exports.createPrescription = async (req, res) => {
     try {
         const {
             appointmentId,
             diagnosis,
             medicines,
-            instructions
+            instructions,
+            clinicalNotes
         } = req.body;
 
-        // Find the logged-in doctor's Doctor document
+        // 1. Find logged-in doctor
         const doctor = await Doctor.findOne({
             email: req.user.email
         });
@@ -22,10 +25,9 @@ exports.createPrescription = async (req, res) => {
             });
         }
 
-        // Find appointment
-        const appointment = await Appointment.findById(
-            appointmentId
-        );
+        // 2. Find appointment
+        const appointment =
+            await Appointment.findById(appointmentId);
 
         if (!appointment) {
             return res.status(404).json({
@@ -33,7 +35,7 @@ exports.createPrescription = async (req, res) => {
             });
         }
 
-        // Make sure this appointment belongs to this doctor
+        // 3. Check doctor owns appointment
         if (
             appointment.doctor.toString() !==
             doctor._id.toString()
@@ -44,7 +46,38 @@ exports.createPrescription = async (req, res) => {
             });
         }
 
-        // Create prescription
+        // 4. Generate post-visit summary
+        let postVisitSummary = null;
+
+        try {
+            postVisitSummary =
+                await generatePostVisitSummary({
+                    clinicalNotes,
+                    diagnosis,
+                    medicines,
+                    instructions
+                });
+
+        } catch (error) {
+            console.error(
+                "Post-visit summary generation failed:",
+                error.message
+            );
+        }
+
+        // 5. Save post-visit information
+        appointment.clinicalNotes =
+            clinicalNotes;
+
+        appointment.postVisitSummary =
+            postVisitSummary;
+
+        appointment.status =
+            "COMPLETED";
+
+        await appointment.save();
+
+        // 6. Create prescription
         const prescription =
             await Prescription.create({
                 patient: appointment.patient,
@@ -55,13 +88,23 @@ exports.createPrescription = async (req, res) => {
                 instructions
             });
 
+        // 7. Send response
         res.status(201).json({
             message:
                 "Prescription created successfully",
-            prescription
+
+            prescription,
+
+            postVisitSummary
         });
 
     } catch (error) {
+
+        console.error(
+            "Prescription creation error:",
+            error
+        );
+
         res.status(500).json({
             message: error.message
         });
@@ -81,13 +124,29 @@ exports.getMyPrescriptions = async (req, res) => {
             )
             .populate(
                 "appointment",
-                "appointmentTime"
+                "appointmentTime postVisitSummary"
             )
-            .sort({ createdAt: -1 });
+            .sort({
+                createdAt: -1
+            });
+
+        console.log(
+            "PRESCRIPTIONS:",
+            JSON.stringify(
+                prescriptions,
+                null,
+                2
+            )
+        );
 
         res.status(200).json(prescriptions);
 
     } catch (error) {
+        console.error(
+            "Failed to fetch prescriptions:",
+            error
+        );
+
         res.status(500).json({
             message: error.message
         });

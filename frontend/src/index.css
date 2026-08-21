@@ -716,3 +716,88 @@ button:hover {
 .status-actions button:hover {
   opacity: 0.9;
 }
+/* =========================
+   AI PRE-VISIT SUMMARY
+========================= */
+
+.pre-visit-summary {
+  margin-top: 18px;
+  padding: 18px 20px;
+  border-radius: 12px;
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+}
+
+.pre-visit-summary h4 {
+  margin: 0 0 15px 0;
+  font-size: 17px;
+  color: #1e293b;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.pre-visit-summary h4::before {
+  content: "✦";
+  font-size: 18px;
+}
+
+.pre-visit-summary p {
+  margin: 10px 0;
+  color: #475569;
+  line-height: 1.5;
+}
+
+.pre-visit-summary strong {
+  color: #1e293b;
+}
+
+/* =========================
+   URGENCY
+========================= */
+
+.urgency-low,
+.urgency-medium,
+.urgency-high {
+  display: inline-block;
+  padding: 4px 10px;
+  border-radius: 20px;
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.urgency-low {
+  background: #dcfce7;
+  color: #166534;
+}
+
+.urgency-medium {
+  background: #fef3c7;
+  color: #92400e;
+}
+
+.urgency-high {
+  background: #fee2e2;
+  color: #991b1b;
+}
+
+/* =========================
+   SUGGESTED QUESTIONS
+========================= */
+
+.pre-visit-summary ol {
+  margin: 10px 0 0 20px;
+  padding-left: 18px;
+}
+
+.pre-visit-summary li {
+  margin-bottom: 8px;
+  padding-left: 5px;
+  color: #475569;
+  line-height: 1.5;
+}
+
+.pre-visit-summary li:last-child {
+  margin-bottom: 0;
+}

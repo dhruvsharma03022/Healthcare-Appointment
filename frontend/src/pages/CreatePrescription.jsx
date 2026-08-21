@@ -6,7 +6,7 @@ const API_URL = "http://localhost:5000/api";
 function CreatePrescription() {
   const { appointmentId } = useParams();
   const navigate = useNavigate();
-
+const [clinicalNotes, setClinicalNotes] = useState("");
   const [diagnosis, setDiagnosis] = useState("");
   const [instructions, setInstructions] = useState("");
 
@@ -72,11 +72,12 @@ function CreatePrescription() {
           },
 
           body: JSON.stringify({
-            appointmentId,
-            diagnosis,
-            medicines,
-            instructions
-          })
+  appointmentId,
+  diagnosis,
+  clinicalNotes,
+  medicines,
+  instructions
+})
         }
       );
 
@@ -125,7 +126,21 @@ function CreatePrescription() {
           />
 
         </div>
+            <div className="form-group">
 
+  <label>Clinical Notes</label>
+
+  <textarea
+    placeholder="Enter post-visit clinical notes"
+    value={clinicalNotes}
+    onChange={(e) =>
+      setClinicalNotes(e.target.value)
+    }
+    rows="5"
+    required
+  />
+
+</div>
 
         <h3>Medicines</h3>
 

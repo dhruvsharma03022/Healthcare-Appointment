@@ -25,6 +25,11 @@ function PatientPrescriptions() {
 
       const data = await res.json();
 
+      console.log(
+        "PRESCRIPTIONS FROM API:",
+        data
+      );
+
       if (!res.ok) {
         throw new Error(
           data.message ||
@@ -44,6 +49,19 @@ function PatientPrescriptions() {
     }
   };
 
+  // Safely display strings or objects
+  const displayItem = (item) => {
+    if (typeof item === "string") {
+      return item;
+    }
+
+    if (typeof item === "object" && item !== null) {
+      return Object.values(item).join(" - ");
+    }
+
+    return String(item);
+  };
+
   if (loading) {
     return (
       <div className="prescriptions-page">
@@ -59,23 +77,23 @@ function PatientPrescriptions() {
 
       {prescriptions.length === 0 ? (
 
-        <p>
-          No prescriptions available.
-        </p>
+        <p>No prescriptions available.</p>
 
       ) : (
 
-        prescriptions.map(
-          (prescription) => (
+        prescriptions.map((prescription) => {
+
+          const postVisitSummary =
+            prescription.appointment?.postVisitSummary;
+
+          return (
 
             <div
               className="prescription-card"
               key={prescription._id}
             >
 
-              <h2>
-                Prescription
-              </h2>
+              <h2>Prescription</h2>
 
               <p>
                 <strong>Doctor:</strong>{" "}
@@ -102,9 +120,81 @@ function PatientPrescriptions() {
                 {prescription.diagnosis}
               </p>
 
+              {/* POST VISIT SUMMARY */}
+
+             {postVisitSummary ? (
+
+  <div className="post-visit-summary">
+
+    <hr />
+
+    <h3>Post-Visit Summary</h3>
+
+    {postVisitSummary.summary && (
+      <p>
+        {postVisitSummary.summary}
+      </p>
+    )}
+
+    {Array.isArray(
+      postVisitSummary.medicationSchedule
+    ) && (
+      <>
+        <h3>Medication Schedule</h3>
+
+        <ul>
+          {postVisitSummary.medicationSchedule.map(
+            (item, index) => (
+              <li key={index}>
+                {displayItem(item)}
+              </li>
+            )
+          )}
+        </ul>
+      </>
+    )}
+
+    {Array.isArray(
+      postVisitSummary.followUpSteps
+    ) && (
+      <>
+        <h3>Follow-Up Steps</h3>
+
+        <ul>
+          {postVisitSummary.followUpSteps.map(
+            (step, index) => (
+              <li key={index}>
+                {displayItem(step)}
+              </li>
+            )
+          )}
+        </ul>
+      </>
+    )}
+
+  </div>
+
+) : (
+
+  <div className="post-visit-summary">
+
+    <hr />
+
+    <h3>Post-Visit Summary</h3>
+
+    <p>
+      AI summary was not available for this consultation.
+    </p>
+
+  </div>
+
+)}
+
+              <hr />
+
               <h3>Medicines</h3>
 
-              {prescription.medicines.map(
+              {prescription.medicines?.map(
                 (medicine, index) => (
 
                   <div
@@ -113,23 +203,17 @@ function PatientPrescriptions() {
                   >
 
                     <p>
-                      <strong>
-                        Medicine:
-                      </strong>{" "}
+                      <strong>Medicine:</strong>{" "}
                       {medicine.name}
                     </p>
 
                     <p>
-                      <strong>
-                        Dosage:
-                      </strong>{" "}
+                      <strong>Dosage:</strong>{" "}
                       {medicine.dosage}
                     </p>
 
                     <p>
-                      <strong>
-                        Duration:
-                      </strong>{" "}
+                      <strong>Duration:</strong>{" "}
                       {medicine.duration}
                     </p>
 
@@ -140,6 +224,7 @@ function PatientPrescriptions() {
 
               {prescription.instructions && (
                 <>
+
                   <h3>
                     Instructions
                   </h3>
@@ -147,13 +232,14 @@ function PatientPrescriptions() {
                   <p>
                     {prescription.instructions}
                   </p>
+
                 </>
               )}
 
             </div>
 
-          )
-        )
+          );
+        })
 
       )}
 
