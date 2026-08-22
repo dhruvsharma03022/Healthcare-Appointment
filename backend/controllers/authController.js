@@ -156,6 +156,30 @@ exports.getMe = async (req, res) => {
     res.status(200).json(req.user);
 };
 exports.forgotPassword = async (req, res) => {
+    console.log("USER FOUND");
+
+await user.save();
+
+console.log("USER SAVED");
+
+const resetLink =
+    `https://YOUR-ACTUAL-VERCEL-DOMAIN.vercel.app/reset-password/${resetToken}`;
+
+console.log("ABOUT TO SEND EMAIL");
+
+const info = await transporter.sendMail({
+    from: process.env.EMAIL_USER,
+    to: user.email,
+    subject: "Healthcare Manager - Password Reset",
+    html: `
+        <h2>Password Reset</h2>
+        <p>You requested a password reset for your Healthcare Manager account.</p>
+        <a href="${resetLink}">Reset Password</a>
+        <p>This link will expire in 15 minutes.</p>
+    `
+});
+
+console.log("EMAIL SENT:", info.messageId);
     try {
         const { email } = req.body;
 
