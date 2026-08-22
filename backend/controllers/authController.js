@@ -182,8 +182,8 @@ exports.forgotPassword = async (req, res) => {
 
         await user.save();
 
-        const resetLink =
-    `https://YOUR-VERCEL-DOMAIN.vercel.app/reset-password/${resetToken}`;
+       const resetLink =
+    `https://healthcare-manager.vercel.app/reset-password/${resetToken}`;
 
         await transporter.sendMail({
             from: process.env.EMAIL_USER,
