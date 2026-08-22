@@ -269,7 +269,7 @@ exports.resetPassword = async (req, res) => {
             });
         }
 
-        // Password validation
+        // Password validationnn
         if (password.length < 8) {
             return res.status(400).json({
                 message:
