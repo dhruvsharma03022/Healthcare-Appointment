@@ -1,5 +1,6 @@
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 
+import Navbar from "./components/Navbar";
 import Login from "./pages/Login";
 import Register from "./pages/Register";
 import PatientDashboard from "./pages/PatientDashboard";
@@ -18,6 +19,8 @@ import PatientPrescriptions from "./pages/PatientPrescriptions";
 import AppointmentHistory from "./pages/AppointmentHistory";
 import ForgotPassword from "./pages/ForgotPassword";
 import ResetPassword from "./pages/ResetPassword";
+import DoctorAllAppointments from "./pages/DoctorAllAppointments";
+import DoctorLeaves from "./pages/DoctorLeaves";
 function Home() {
   return <h1>Healthcare Manager</h1>;
 }
@@ -25,6 +28,7 @@ function Home() {
 function App() {
   return (
     <BrowserRouter>
+      <Navbar />
       <Routes>
         <Route path="/" element={<Login />} />
         <Route
@@ -34,6 +38,10 @@ function App() {
       <AdminAppointments />
     </ProtectedRoute>
   }
+/>
+<Route
+  path="/doctor/leaves"
+  element={<DoctorLeaves />}
 />
 <Route
   path="/forgot-password"
@@ -66,6 +74,15 @@ function App() {
 <Route
   path="/patient/prescriptions"
   element={<PatientPrescriptions />}
+/>
+<Route
+  path="/doctor/completed-appointments"
+  element={<DoctorAllAppointments />}
+/>
+
+<Route
+  path="/doctor/cancelled-appointments"
+  element={<DoctorAllAppointments />}
 />
 <Route
   path="/doctor/prescription/:appointmentId"

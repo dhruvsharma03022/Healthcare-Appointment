@@ -12,6 +12,9 @@ export default function BookAppointment() {
   const [message, setMessage] = useState("");
   const [loadingSlots, setLoadingSlots] = useState(false);
 
+  // NEW: booking loading state
+  const [booking, setBooking] = useState(false);
+
   useEffect(() => {
     fetchDoctors();
   }, []);
@@ -73,7 +76,7 @@ export default function BookAppointment() {
       if (!res.ok) {
         throw new Error(
           data.message ||
-            "Failed to load available slots"
+          "Failed to load available slots"
         );
       }
 
@@ -108,6 +111,10 @@ export default function BookAppointment() {
     }
 
     try {
+      // NEW: start loading
+      setBooking(true);
+      setMessage("");
+
       const token = localStorage.getItem("token");
 
       const appointmentTime = new Date(
@@ -152,6 +159,10 @@ export default function BookAppointment() {
 
     } catch (err) {
       setMessage(err.message);
+
+    } finally {
+      // NEW: stop loading
+      setBooking(false);
     }
   };
 
@@ -179,6 +190,7 @@ export default function BookAppointment() {
             setDoctorId(e.target.value)
           }
           required
+          disabled={booking}
         >
 
           <option value="">
@@ -211,6 +223,7 @@ export default function BookAppointment() {
             setDate(e.target.value)
           }
           required
+          disabled={booking}
         />
 
         {/* Available Slots */}
@@ -241,6 +254,7 @@ export default function BookAppointment() {
                   setTime(e.target.value)
                 }
                 required
+                disabled={booking}
               >
 
                 <option value="">
@@ -272,6 +286,7 @@ export default function BookAppointment() {
             setSymptoms(e.target.value)
           }
           rows="4"
+          disabled={booking}
         />
 
         {/* Submit */}
@@ -281,10 +296,13 @@ export default function BookAppointment() {
           disabled={
             !doctorId ||
             !date ||
-            !time
+            !time ||
+            booking
           }
         >
-          Book Appointment
+          {booking
+            ? "Booking Appointment..."
+            : "Book Appointment"}
         </button>
 
       </form>

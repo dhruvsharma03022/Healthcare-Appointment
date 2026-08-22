@@ -1,3 +1,4 @@
+
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 
@@ -9,6 +10,7 @@ function DoctorDashboard() {
   const [appointments, setAppointments] = useState([]);
   const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState("UPCOMING");
+  const [searchTerm, setSearchTerm] = useState("");
 
   const user = JSON.parse(
     localStorage.getItem("user")
@@ -26,25 +28,71 @@ function DoctorDashboard() {
       new Date(appointment.appointmentTime) > now
   );
 
-  const completedAppointments = appointments.filter(
-    (appointment) =>
-      appointment.status === "COMPLETED"
-  );
+  const completedAppointments = appointments
+    .filter(
+      (appointment) =>
+        appointment.status === "COMPLETED"
+    )
+    .sort(
+      (a, b) =>
+        new Date(b.appointmentTime) -
+        new Date(a.appointmentTime)
+    );
 
-  const cancelledAppointments = appointments.filter(
-    (appointment) =>
-      appointment.status === "CANCELLED"
-  );
+  const cancelledAppointments = appointments
+    .filter(
+      (appointment) =>
+        appointment.status === "CANCELLED"
+    )
+    .sort(
+      (a, b) =>
+        new Date(b.appointmentTime) -
+        new Date(a.appointmentTime)
+    );
 
+  // Dashboard shows only latest 10
   let displayedAppointments = [];
 
   if (activeTab === "UPCOMING") {
-    displayedAppointments = upcomingAppointments;
+    displayedAppointments =
+      upcomingAppointments;
   } else if (activeTab === "COMPLETED") {
-    displayedAppointments = completedAppointments;
+    displayedAppointments =
+      completedAppointments.slice(0, 10);
   } else if (activeTab === "CANCELLED") {
-    displayedAppointments = cancelledAppointments;
+    displayedAppointments =
+      cancelledAppointments.slice(0, 10);
   }
+
+  // =========================
+  // SEARCH FILTER
+  // =========================
+
+  const searchedAppointments =
+    displayedAppointments.filter(
+      (appointment) => {
+        const patientName =
+          appointment.patient?.name
+            ?.toLowerCase() || "";
+
+        const patientEmail =
+          appointment.patient?.email
+            ?.toLowerCase() || "";
+
+        const symptoms =
+          appointment.symptoms
+            ?.toLowerCase() || "";
+
+        const search =
+          searchTerm.toLowerCase();
+
+        return (
+          patientName.includes(search) ||
+          patientEmail.includes(search) ||
+          symptoms.includes(search)
+        );
+      }
+    );
 
   // =========================
   // FETCH APPOINTMENTS
@@ -52,14 +100,17 @@ function DoctorDashboard() {
 
   const fetchAppointments = async () => {
     try {
-      const token = localStorage.getItem("token");
+      setLoading(true);
 
-      // Get actual Doctor document
+      const token =
+        localStorage.getItem("token");
+
       const doctorRes = await fetch(
         `${API_URL}/doctors/me`,
         {
           headers: {
-            Authorization: `Bearer ${token}`,
+            Authorization:
+              `Bearer ${token}`,
           },
         }
       );
@@ -70,38 +121,43 @@ function DoctorDashboard() {
       if (!doctorRes.ok) {
         throw new Error(
           doctorData.message ||
-            "Failed to fetch doctor profile"
+          "Failed to fetch doctor profile"
         );
       }
 
-      // Get doctor's appointments
       const res = await fetch(
         `${API_URL}/appointments/doctor/${doctorData._id}`,
         {
           headers: {
-            Authorization: `Bearer ${token}`,
+            Authorization:
+              `Bearer ${token}`,
           },
         }
       );
 
-      const data = await res.json();
+      const data =
+        await res.json();
 
       if (!res.ok) {
         throw new Error(
           data.message ||
-            "Failed to fetch appointments"
+          "Failed to fetch appointments"
         );
       }
 
       setAppointments(data);
 
     } catch (error) {
+
       console.error(
         "Failed to fetch doctor appointments:",
         error
       );
+
     } finally {
+
       setLoading(false);
+
     }
   };
 
@@ -114,6 +170,7 @@ function DoctorDashboard() {
     status
   ) => {
     try {
+
       const token =
         localStorage.getItem("token");
 
@@ -136,33 +193,25 @@ function DoctorDashboard() {
         }
       );
 
-      const data = await res.json();
+      const data =
+        await res.json();
 
       if (!res.ok) {
         throw new Error(
           data.message ||
-            "Failed to update status"
+          "Failed to update status"
         );
       }
 
-      // Refresh appointments
       fetchAppointments();
 
     } catch (error) {
+
       console.error(error);
+
       alert(error.message);
+
     }
-  };
-
-  // =========================
-  // LOGOUT
-  // =========================
-
-  const handleLogout = () => {
-    localStorage.removeItem("token");
-    localStorage.removeItem("user");
-
-    navigate("/login");
   };
 
   // =========================
@@ -172,6 +221,15 @@ function DoctorDashboard() {
   useEffect(() => {
     fetchAppointments();
   }, []);
+
+  // =========================
+  // TAB CHANGE
+  // =========================
+
+  const handleTabChange = (tab) => {
+    setActiveTab(tab);
+    setSearchTerm("");
+  };
 
   // =========================
   // LOADING
@@ -192,36 +250,33 @@ function DoctorDashboard() {
   return (
     <div className="dashboard">
 
-      <header className="dashboard-header">
-
-        <h1>
-          Healthcare Manager
-        </h1>
-
-        <button
-          className="logout-btn"
-          onClick={handleLogout}
-        >
-          Logout
-        </button>
-
-      </header>
-
       <main className="dashboard-content">
 
         {/* WELCOME */}
 
-        <div className="welcome-section">
+        
+<div className="welcome-section">
 
-          <h2>
-            Welcome, Dr. {user.name} 👨‍⚕️
-          </h2>
+  <h2>
+    Welcome, Dr. {user.name} 👨‍⚕️
+  </h2>
 
-          <p>
-            Manage your patient appointments.
-          </p>
+  <p>
+    Manage your patient appointments.
+  </p>
 
-        </div>
+  <button
+    className="leave-btn"
+    onClick={() =>
+      navigate("/doctor/leaves")
+    }
+  >
+    Manage Leave Dates
+  </button>
+
+</div>
+
+
 
         {/* APPOINTMENT TABS */}
 
@@ -234,7 +289,7 @@ function DoctorDashboard() {
                 : ""
             }
             onClick={() =>
-              setActiveTab("UPCOMING")
+              handleTabChange("UPCOMING")
             }
           >
             Upcoming (
@@ -249,7 +304,7 @@ function DoctorDashboard() {
                 : ""
             }
             onClick={() =>
-              setActiveTab("COMPLETED")
+              handleTabChange("COMPLETED")
             }
           >
             Completed (
@@ -264,7 +319,7 @@ function DoctorDashboard() {
                 : ""
             }
             onClick={() =>
-              setActiveTab("CANCELLED")
+              handleTabChange("CANCELLED")
             }
           >
             Cancelled (
@@ -279,6 +334,7 @@ function DoctorDashboard() {
         <div className="dashboard-card">
 
           <h3>
+
             {activeTab === "UPCOMING" &&
               "Upcoming Appointments"}
 
@@ -287,26 +343,40 @@ function DoctorDashboard() {
 
             {activeTab === "CANCELLED" &&
               "Cancelled Appointments"}
+
           </h3>
 
-          {/* NO APPOINTMENTS IN SELECTED TAB */}
+          {/* SEARCH BAR */}
 
-          {displayedAppointments.length === 0 ? (
+          <input
+            className="appointment-search"
+            type="text"
+            placeholder="Search by patient name, email or symptoms..."
+            value={searchTerm}
+            onChange={(e) =>
+              setSearchTerm(e.target.value)
+            }
+          />
+
+          {/* NO APPOINTMENTS */}
+
+          {searchedAppointments.length === 0 ? (
 
             <p>
-              {activeTab === "UPCOMING" &&
-                "No upcoming appointments."}
 
-              {activeTab === "COMPLETED" &&
-                "No completed appointments."}
+              {searchTerm
+                ? "No appointments found."
+                : activeTab === "UPCOMING"
+                  ? "No upcoming appointments."
+                  : activeTab === "COMPLETED"
+                    ? "No completed appointments."
+                    : "No cancelled appointments."}
 
-              {activeTab === "CANCELLED" &&
-                "No cancelled appointments."}
             </p>
 
           ) : (
 
-            displayedAppointments.map(
+            searchedAppointments.map(
               (appointment) => (
 
                 <div
@@ -335,73 +405,138 @@ function DoctorDashboard() {
                     ).toLocaleString()}
                   </p>
 
-                <p>
-  <strong>
-    Symptoms:
-  </strong>{" "}
-  {appointment.symptoms}
-</p>
+                  <p>
+                    <strong>
+                      Symptoms:
+                    </strong>{" "}
+                    {appointment.symptoms}
+                  </p>
 
-{/* AI PRE-VISIT SUMMARY */}
+                  {/* AI PRE-VISIT SUMMARY */}
 
-{appointment.preVisitSummary && (
-  <div className="pre-visit-summary">
+                  {appointment.preVisitSummary && (
 
-    <h4>AI Pre-Visit Summary</h4>
+                    <div className="pre-visit-summary">
 
-    <p>
-      <strong>Urgency:</strong>{" "}
-      <span
-        className={`urgency-${appointment.preVisitSummary.urgency?.toLowerCase()}`}
-      >
-        {appointment.preVisitSummary.urgency}
-      </span>
-    </p>
+                      <h4>
+                        AI Pre-Visit Summary
+                      </h4>
 
-    <p>
-      <strong>Chief Complaint:</strong>{" "}
-      {appointment.preVisitSummary.chiefComplaint}
-    </p>
+                      <p>
 
-    {appointment.preVisitSummary.suggestedQuestions?.length > 0 && (
-      <div>
-        <strong>Suggested Questions:</strong>
+                        <strong>
+                          Urgency:
+                        </strong>{" "}
 
-        <ol>
-          {appointment.preVisitSummary.suggestedQuestions.map(
-            (question, index) => (
-              <li key={index}>
-                {question}
-              </li>
-            )
-          )}
-        </ol>
-      </div>
-    )}
+                        <span
+                          className={
+                            `urgency-${appointment
+                              .preVisitSummary
+                              .urgency
+                              ?.toLowerCase()}`
+                          }
+                        >
 
-  </div>
-)}
+                          {
+                            appointment
+                              .preVisitSummary
+                              .urgency
+                          }
 
-<p>
-  <strong>
-    Status:
-  </strong>{" "}
+                        </span>
+
+                      </p>
+
+                      <p>
+
+                        <strong>
+                          Chief Complaint:
+                        </strong>{" "}
+
+                        {
+                          appointment
+                            .preVisitSummary
+                            .chiefComplaint
+                        }
+
+                      </p>
+
+                      {
+                        appointment
+                          .preVisitSummary
+                          .suggestedQuestions
+                          ?.length > 0 && (
+
+                          <div>
+
+                            <strong>
+                              Suggested Questions:
+                            </strong>
+
+                            <ol>
+
+                              {
+                                appointment
+                                  .preVisitSummary
+                                  .suggestedQuestions
+                                  .map(
+                                    (
+                                      question,
+                                      index
+                                    ) => (
+
+                                      <li
+                                        key={index}
+                                      >
+                                        {question}
+                                      </li>
+
+                                    )
+                                  )
+                              }
+
+                            </ol>
+
+                          </div>
+
+                        )
+                      }
+
+                    </div>
+
+                  )}
+
+                  <p>
+
+                    <strong>
+                      Status:
+                    </strong>{" "}
+
                     <span
-                      className={`status-badge ${appointment.status.toLowerCase()}`}
+                      className={
+                        `status-badge ${appointment
+                          .status
+                          .toLowerCase()}`
+                      }
                     >
-                      {appointment.status}
+
+                      {
+                        appointment.status
+                      }
+
                     </span>
+
                   </p>
 
                   {/* ACTIONS */}
 
                   <div className="status-actions">
 
-                    {/* BOOKED */}
-
                     {appointment.status ===
                       "BOOKED" && (
+
                       <>
+
                         <button
                           className="complete-btn"
                           onClick={() =>
@@ -425,10 +560,10 @@ function DoctorDashboard() {
                         >
                           Cancel Appointment
                         </button>
-                      </>
-                    )}
 
-                    {/* PRESCRIPTION */}
+                      </>
+
+                    )}
 
                     <button
                       className="prescription-btn"
@@ -450,6 +585,50 @@ function DoctorDashboard() {
 
           )}
 
+          {/* VIEW ALL COMPLETED */}
+
+          {activeTab === "COMPLETED" &&
+            completedAppointments.length > 10 && (
+
+              <div className="view-all-container">
+
+                <button
+                  className="view-all-btn"
+                  onClick={() =>
+                    navigate(
+                      "/doctor/completed-appointments"
+                    )
+                  }
+                >
+                  View All Completed Appointments
+                </button>
+
+              </div>
+
+            )}
+
+          {/* VIEW ALL CANCELLED */}
+
+          {activeTab === "CANCELLED" &&
+            cancelledAppointments.length > 10 && (
+
+              <div className="view-all-container">
+
+                <button
+                  className="view-all-btn"
+                  onClick={() =>
+                    navigate(
+                      "/doctor/cancelled-appointments"
+                    )
+                  }
+                >
+                  View All Cancelled Appointments
+                </button>
+
+              </div>
+
+            )}
+
         </div>
 
       </main>
@@ -459,3 +638,4 @@ function DoctorDashboard() {
 }
 
 export default DoctorDashboard;
+

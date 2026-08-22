@@ -87,25 +87,8 @@ const cancelledAppointments = appointments.filter(
   (appointment) =>
     appointment.status === "CANCELLED"
 ).length;
-  const handleLogout = () => {
-  localStorage.removeItem("token");
-  localStorage.removeItem("user");
-
-  navigate("/login");
-};
   return (
     <div className="dashboard">
-      <header className="dashboard-header">
-        <h1>Healthcare Manager</h1>
-
-        <button
-  className="logout-btn"
-  onClick={handleLogout}
->
-  Logout
-</button>
-      </header>
-
       <main className="dashboard-content">
         <div className="welcome-section">
           <h2>Admin Dashboard 👨‍💼</h2>
