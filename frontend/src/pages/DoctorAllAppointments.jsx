@@ -145,7 +145,7 @@ function DoctorAllAppointments() {
         <button
           className="back-btn"
           onClick={() =>
-            navigate("/doctor/dashboard")
+            navigate("/doctor")
           }
         >
           ← Back to Dashboard
