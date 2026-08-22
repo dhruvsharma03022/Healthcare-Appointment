@@ -12,7 +12,9 @@ const generateToken = (id, role) => {
     );
 };
 const transporter = nodemailer.createTransport({
-    service: "gmail",
+    host: "smtp.gmail.com",
+    port: 465,
+    secure: true,
     auth: {
         user: process.env.EMAIL_USER,
         pass: process.env.EMAIL_PASSWORD
@@ -174,7 +176,7 @@ exports.forgotPassword = async (req, res) => {
         await user.save();
 
         const resetLink =
-            `http://localhost:5173/reset-password/${resetToken}`;
+    `https://YOUR-VERCEL-DOMAIN.vercel.app/reset-password/${resetToken}`;
 
         await transporter.sendMail({
             from: process.env.EMAIL_USER,
