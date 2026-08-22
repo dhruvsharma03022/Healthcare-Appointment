@@ -71,180 +71,265 @@ function PatientPrescriptions() {
   }
 
   return (
-    <div className="prescriptions-page">
+  <div className="prescriptions-page">
 
-      <h1>My Prescriptions</h1>
+    <h1>My Prescriptions</h1>
 
-      {prescriptions.length === 0 ? (
+    {prescriptions.length === 0 ? (
 
-        <p>No prescriptions available.</p>
+      <p>No prescriptions available.</p>
 
-      ) : (
+    ) : (
 
-        prescriptions.map((prescription) => {
+      prescriptions.map((prescription) => {
 
-          const postVisitSummary =
-            prescription.appointment?.postVisitSummary;
+        const postVisitSummary =
+          prescription.appointment?.postVisitSummary;
 
-          return (
+        return (
 
-            <div
-              className="prescription-card"
-              key={prescription._id}
-            >
+          <div
+            className="prescription-card"
+            key={prescription._id}
+          >
 
-              <h2>Prescription</h2>
+            <h2>Prescription</h2>
 
-              <p>
-                <strong>Doctor:</strong>{" "}
-                Dr. {prescription.doctor?.name}
-              </p>
+            <p>
+              <strong>Doctor:</strong>{" "}
+              Dr. {prescription.doctor?.name}
+            </p>
 
-              <p>
-                <strong>Specialization:</strong>{" "}
-                {prescription.doctor?.specialization}
-              </p>
+            <p>
+              <strong>Specialization:</strong>{" "}
+              {prescription.doctor?.specialization}
+            </p>
 
-              <p>
-                <strong>Date:</strong>{" "}
-                {new Date(
-                  prescription.createdAt
-                ).toLocaleDateString()}
-              </p>
+            <p>
+              <strong>Date:</strong>{" "}
+              {new Date(
+                prescription.createdAt
+              ).toLocaleDateString()}
+            </p>
 
-              <hr />
+            <hr />
 
-              <h3>Diagnosis</h3>
+            {/* DIAGNOSIS */}
 
-              <p>
-                {prescription.diagnosis}
-              </p>
+            <h3>Diagnosis</h3>
 
-              {/* POST VISIT SUMMARY */}
+            <p>
+              {prescription.diagnosis}
+            </p>
 
-             {postVisitSummary ? (
 
-  <div className="post-visit-summary">
+            {/* POST-VISIT SUMMARY */}
 
-    <hr />
+            {postVisitSummary ? (
 
-    <h3>Post-Visit Summary</h3>
+              <div className="post-visit-summary">
 
-    {postVisitSummary.summary && (
-      <p>
-        {postVisitSummary.summary}
-      </p>
-    )}
+                <h2>
+                  Post-Visit Summary
+                </h2>
 
-    {Array.isArray(
-      postVisitSummary.medicationSchedule
-    ) && (
-      <>
-        <h3>Medication Schedule</h3>
 
-        <ul>
-          {postVisitSummary.medicationSchedule.map(
-            (item, index) => (
-              <li key={index}>
-                {displayItem(item)}
-              </li>
-            )
-          )}
-        </ul>
-      </>
-    )}
+                {/* CONSULTATION SUMMARY */}
 
-    {Array.isArray(
-      postVisitSummary.followUpSteps
-    ) && (
-      <>
-        <h3>Follow-Up Steps</h3>
+                {postVisitSummary.summary && (
 
-        <ul>
-          {postVisitSummary.followUpSteps.map(
-            (step, index) => (
-              <li key={index}>
-                {displayItem(step)}
-              </li>
-            )
-          )}
-        </ul>
-      </>
-    )}
+                  <div className="summary-section">
 
-  </div>
-
-) : (
-
-  <div className="post-visit-summary">
-
-    <hr />
-
-    <h3>Post-Visit Summary</h3>
-
-    <p>
-      AI summary was not available for this consultation.
-    </p>
-
-  </div>
-
-)}
-
-              <hr />
-
-              <h3>Medicines</h3>
-
-              {prescription.medicines?.map(
-                (medicine, index) => (
-
-                  <div
-                    className="medicine-card"
-                    key={index}
-                  >
+                    <h3>
+                      Consultation Summary
+                    </h3>
 
                     <p>
-                      <strong>Medicine:</strong>{" "}
-                      {medicine.name}
-                    </p>
-
-                    <p>
-                      <strong>Dosage:</strong>{" "}
-                      {medicine.dosage}
-                    </p>
-
-                    <p>
-                      <strong>Duration:</strong>{" "}
-                      {medicine.duration}
+                      {postVisitSummary.summary}
                     </p>
 
                   </div>
 
-                )
-              )}
+                )}
 
-              {prescription.instructions && (
-                <>
 
-                  <h3>
-                    Instructions
-                  </h3>
+                {/* MEDICATION SCHEDULE */}
+
+                {Array.isArray(
+                  postVisitSummary.medicationSchedule
+                ) && (
+                  <div className="summary-section">
+
+                    <h3>
+                      Medication Schedule
+                    </h3>
+
+                    <ul>
+
+                      {postVisitSummary.medicationSchedule.map(
+                        (item, index) => (
+
+                          <li
+                            key={item._id || index}
+                          >
+
+                            <strong>
+                              {item.medicine}
+                            </strong>
+
+                            {" — "}
+
+                            Dosage: {item.dosage}
+
+                            {" | "}
+
+                            Duration: {item.duration}
+
+                          </li>
+
+                        )
+                      )}
+
+                    </ul>
+
+                  </div>
+                )}
+
+
+                {/* FOLLOW-UP STEPS */}
+
+                {Array.isArray(
+                  postVisitSummary.followUpSteps
+                ) && (
+
+                  <div className="summary-section">
+
+                    <h3>
+                      Follow-Up Steps
+                    </h3>
+
+                    <ul>
+
+                      {postVisitSummary.followUpSteps.map(
+                        (step, index) => (
+
+                          <li key={index}>
+                            {step}
+                          </li>
+
+                        )
+                      )}
+
+                    </ul>
+
+                  </div>
+
+                )}
+
+              </div>
+
+            ) : (
+
+              <div className="post-visit-summary">
+
+                <h3>
+                  Post-Visit Summary
+                </h3>
+
+                <p>
+                  AI summary was not available
+                  for this consultation.
+                </p>
+
+              </div>
+
+            )}
+
+
+            <hr />
+
+
+            {/* MEDICINES */}
+
+            <h3>Medicines</h3>
+
+            {prescription.medicines?.map(
+              (medicine, index) => (
+
+                <div
+                  className="medicine-card"
+                  key={medicine._id || index}
+                >
 
                   <p>
-                    {prescription.instructions}
+
+                    <strong>
+                      Medicine:
+                    </strong>
+
+                    {" "}
+                    {medicine.name}
+
                   </p>
 
-                </>
-              )}
 
-            </div>
+                  <p>
 
-          );
-        })
+                    <strong>
+                      Dosage:
+                    </strong>
 
-      )}
+                    {" "}
+                    {medicine.dosage}
 
-    </div>
-  );
+                  </p>
+
+
+                  <p>
+
+                    <strong>
+                      Duration:
+                    </strong>
+
+                    {" "}
+                    {medicine.duration}
+
+                  </p>
+
+                </div>
+
+              )
+            )}
+
+
+            {/* INSTRUCTIONS */}
+
+            {prescription.instructions && (
+
+              <>
+
+                <h3>
+                  Instructions
+                </h3>
+
+                <p>
+                  {prescription.instructions}
+                </p>
+
+              </>
+
+            )}
+
+          </div>
+
+        );
+
+      })
+
+    )}
+
+  </div>
+);
 }
 
 export default PatientPrescriptions;

@@ -801,3 +801,49 @@ button:hover {
 .pre-visit-summary li:last-child {
   margin-bottom: 0;
 }
+.post-visit-summary {
+  margin-top: 25px;
+  padding: 24px;
+  background: #f8fbff;
+  border: 1px solid #dbeafe;
+  border-left: 5px solid #2563eb;
+  border-radius: 12px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.06);
+}
+
+.post-visit-summary h2 {
+  margin-top: 0;
+  margin-bottom: 20px;
+  color: #1e3a8a;
+  font-size: 24px;
+}
+
+.summary-section {
+  margin-top: 20px;
+}
+
+.summary-section h3 {
+  color: #2563eb;
+  font-size: 18px;
+  margin-bottom: 10px;
+}
+
+.summary-section p {
+  line-height: 1.7;
+  color: #374151;
+}
+
+.summary-section ul {
+  padding-left: 0;
+  list-style: none;
+}
+
+.summary-section li {
+  background: white;
+  margin-bottom: 10px;
+  padding: 12px 15px;
+  border-radius: 8px;
+  border: 1px solid #e5e7eb;
+  color: #374151;
+  line-height: 1.5;
+}

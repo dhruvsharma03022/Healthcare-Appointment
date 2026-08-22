@@ -1,6 +1,11 @@
 require("dotenv").config();
 const express = require("express");
 const cors = require("cors");
+const Groq = require("groq-sdk");
+
+const groq = new Groq({
+    apiKey: process.env.GROQ_API_KEY
+});
 const patientRoutes = require("./routes/patientRoutes");
 const authRoutes = require("./routes/authRoutes");
 const appointmentRoutes = require("./routes/appointmentRoutes");
@@ -33,3 +38,21 @@ const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => {
     console.log(`Server running on port ${PORT}`);
 });
+async function listGroqModels() {
+    try {
+        const models = await groq.models.list();
+
+        console.log(
+            "AVAILABLE GROQ MODELS:",
+            models.data.map(model => model.id)
+        );
+
+    } catch (error) {
+        console.error(
+            "Failed to fetch Groq models:",
+            error
+        );
+    }
+}
+
+listGroqModels();
