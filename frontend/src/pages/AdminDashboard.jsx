@@ -168,7 +168,7 @@ const cancelledAppointments = appointments.filter(
             <p>
               View healthcare system statistics.
             </p>
-            <button>View Reports</button>
+            <button onClick={() => navigate("/admin/reports")}>View Reports</button>
           </div>
         </div>
       </main>

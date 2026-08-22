@@ -1,8 +1,10 @@
 const express = require("express");
 const router = express.Router();
-
 const { protect, authorize } =
 require("../middleware/authMiddleware");
+const {
+    getReports
+} = require("../controllers/adminController");
 
 const {
     adminDashboard,
@@ -15,7 +17,12 @@ router.get(
     authorize("ADMIN"),
     adminDashboard
 );
-
+router.get(
+    "/reports",
+    protect,
+    authorize("ADMIN"),
+    getReports
+);
 router.get(
     "/patients",
     protect,

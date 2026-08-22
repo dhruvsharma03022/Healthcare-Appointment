@@ -21,6 +21,7 @@ import ForgotPassword from "./pages/ForgotPassword";
 import ResetPassword from "./pages/ResetPassword";
 import DoctorAllAppointments from "./pages/DoctorAllAppointments";
 import DoctorLeaves from "./pages/DoctorLeaves";
+import AdminReports from "./pages/AdminReports";
 function Home() {
   return <h1>Healthcare Manager</h1>;
 }
@@ -38,6 +39,10 @@ function App() {
       <AdminAppointments />
     </ProtectedRoute>
   }
+/>
+<Route
+  path="/admin/reports"
+  element={<AdminReports />}
 />
 <Route
   path="/doctor/leaves"
