@@ -156,30 +156,6 @@ exports.getMe = async (req, res) => {
     res.status(200).json(req.user);
 };
 exports.forgotPassword = async (req, res) => {
-    console.log("USER FOUND");
-
-await user.save();
-
-console.log("USER SAVED");
-
-const resetLink =
-    `https://YOUR-ACTUAL-VERCEL-DOMAIN.vercel.app/reset-password/${resetToken}`;
-
-console.log("ABOUT TO SEND EMAIL");
-
-const info = await transporter.sendMail({
-    from: process.env.EMAIL_USER,
-    to: user.email,
-    subject: "Healthcare Manager - Password Reset",
-    html: `
-        <h2>Password Reset</h2>
-        <p>You requested a password reset for your Healthcare Manager account.</p>
-        <a href="${resetLink}">Reset Password</a>
-        <p>This link will expire in 15 minutes.</p>
-    `
-});
-
-console.log("EMAIL SENT:", info.messageId);
     try {
         const { email } = req.body;
 
@@ -192,6 +168,8 @@ console.log("EMAIL SENT:", info.messageId);
                     "If an account exists with this email, a password reset link has been sent."
             });
         }
+
+        console.log("USER FOUND");
 
         // Generate random token
         const resetToken =
@@ -206,10 +184,14 @@ console.log("EMAIL SENT:", info.messageId);
 
         await user.save();
 
-       const resetLink =
-    `https://healthcare-manager.vercel.app/reset-password/${resetToken}`;
+        console.log("USER SAVED");
 
-        await transporter.sendMail({
+        const resetLink =
+            `https://healthcare-manager.vercel.app/reset-password/${resetToken}`;
+
+        console.log("ABOUT TO SEND EMAIL");
+
+        const info = await transporter.sendMail({
             from: process.env.EMAIL_USER,
             to: user.email,
             subject: "Healthcare Manager - Password Reset",
@@ -251,13 +233,15 @@ console.log("EMAIL SENT:", info.messageId);
             `
         });
 
+        console.log("EMAIL SENT:", info.messageId);
+
         res.status(200).json({
             message:
                 "If an account exists with this email, a password reset link has been sent."
         });
 
     } catch (error) {
-        console.error(error);
+        console.error("FORGOT PASSWORD ERROR:", error);
 
         res.status(500).json({
             message:
