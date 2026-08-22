@@ -11,23 +11,9 @@ const generateToken = (id, role) => {
         { expiresIn: "7d" }
     );
 };
-const transporter = nodemailer.createTransport({
-    host: "smtp.gmail.com",
-    port: 465,
-    secure: true,
-    auth: {
-        user: process.env.EMAIL_USER,
-        pass: process.env.EMAIL_PASSWORD
-    }
-});
 
-transporter.verify((error, success) => {
-    if (error) {
-        console.error("EMAIL TEST ERROR:", error);
-    } else {
-        console.log("EMAIL SERVER READY");
-    }
-});
+const resend = new Resend(process.env.RESEND_API_KEY);
+
 exports.register = async (req, res) => {
     try {
         const {
@@ -90,23 +76,25 @@ exports.register = async (req, res) => {
             user.role
         );
 
-       const userResponse = {
-    _id: user._id,
-    name: user.name,
-    email: user.email,
-    role: user.role
-};
+        const userResponse = {
+            _id: user._id,
+            name: user.name,
+            email: user.email,
+            role: user.role
+        };
 
-res.status(201).json({
-    token,
-    user: userResponse
-});
+        res.status(201).json({
+            token,
+            user: userResponse
+        });
+
     } catch (error) {
         res.status(500).json({
             message: error.message
         });
     }
 };
+
 exports.login = async (req, res) => {
     try {
         const { email, password } = req.body;
@@ -136,16 +124,16 @@ exports.login = async (req, res) => {
         );
 
         const userResponse = {
-    _id: user._id,
-    name: user.name,
-    email: user.email,
-    role: user.role
-};
+            _id: user._id,
+            name: user.name,
+            email: user.email,
+            role: user.role
+        };
 
-res.status(201).json({
-    token,
-    user: userResponse
-});
+        res.status(201).json({
+            token,
+            user: userResponse
+        });
 
     } catch (error) {
         res.status(500).json({
@@ -153,9 +141,11 @@ res.status(201).json({
         });
     }
 };
+
 exports.getMe = async (req, res) => {
     res.status(200).json(req.user);
 };
+
 exports.forgotPassword = async (req, res) => {
     try {
         const { email } = req.body;
@@ -238,7 +228,8 @@ exports.forgotPassword = async (req, res) => {
             console.error("RESEND ERROR:", error);
 
             return res.status(500).json({
-                message: "Unable to send password reset email"
+                message:
+                    "Unable to send password reset email"
             });
         }
 
@@ -250,7 +241,10 @@ exports.forgotPassword = async (req, res) => {
         });
 
     } catch (error) {
-        console.error("FORGOT PASSWORD ERROR:", error);
+        console.error(
+            "FORGOT PASSWORD ERROR:",
+            error
+        );
 
         res.status(500).json({
             message:
@@ -258,6 +252,7 @@ exports.forgotPassword = async (req, res) => {
         });
     }
 };
+
 exports.resetPassword = async (req, res) => {
     try {
         const { token } = req.params;
@@ -269,7 +264,7 @@ exports.resetPassword = async (req, res) => {
             });
         }
 
-        // Password validationnn
+        // Password validation
         if (password.length < 8) {
             return res.status(400).json({
                 message:
