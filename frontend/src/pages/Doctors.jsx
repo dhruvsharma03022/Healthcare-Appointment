@@ -37,8 +37,8 @@ function Doctors() {
 
       const url =
         params.toString()
-          ? `http://localhost:5000/api/doctors?${params.toString()}`
-          : "http://localhost:5000/api/doctors";
+          ? `https://healthcare-appointment-hn2g.onrender.com/api/doctors?${params.toString()}`
+          : "https://healthcare-appointment-hn2g.onrender.com/api/doctors";
 
       const response = await fetch(url);
 

@@ -57,7 +57,7 @@ function ResetPassword() {
       setLoading(true);
 
       const response = await fetch(
-        `http://localhost:5000/api/auth/reset-password/${token}`,
+        `https://healthcare-appointment-hn2g.onrender.com/api/auth/reset-password/${token}`,
         {
           method: "PUT",
           headers: {

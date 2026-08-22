@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 
-const API_URL = "http://localhost:5000/api";
+const API_URL = "https://healthcare-appointment-hn2g.onrender.com/api";
 
 function CreatePrescription() {
   const { appointmentId } = useParams();

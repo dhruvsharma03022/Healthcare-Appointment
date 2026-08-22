@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 
-const API_URL = "http://localhost:5000/api";
+const API_URL = "https://healthcare-appointment-hn2g.onrender.com/api";
 
 export default function BookAppointment() {
   const [doctors, setDoctors] = useState([]);

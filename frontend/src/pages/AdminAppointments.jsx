@@ -1,7 +1,7 @@
 import { useNavigate } from "react-router-dom";
 import { useEffect, useState } from "react";
 
-const API_URL = "http://localhost:5000/api";
+const API_URL = "https://healthcare-appointment-hn2g.onrender.com/api";
 
 function AdminAppointments() {
   const [appointments, setAppointments] = useState([]);

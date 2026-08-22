@@ -11,7 +11,7 @@ useEffect(() => {
     const token = localStorage.getItem("token");
 
     const res = await fetch(
-      "http://localhost:5000/api/doctors",
+      "https://healthcare-appointment-hn2g.onrender.com/api/doctors",
       {
         headers: {
           Authorization: `Bearer ${token}`,
@@ -40,7 +40,7 @@ useEffect(() => {
       const token = localStorage.getItem("token");
 
       const res = await fetch(
-        "http://localhost:5000/api/appointments",
+        "https://healthcare-appointment-hn2g.onrender.com/api/appointments",
         {
           headers: {
             Authorization: `Bearer ${token}`,
