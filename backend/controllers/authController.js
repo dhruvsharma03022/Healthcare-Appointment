@@ -2,7 +2,7 @@ const User = require("../models/User");
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
 const crypto = require("crypto");
-const nodemailer = require("nodemailer");
+const { Resend } = require("resend");
 
 const generateToken = (id, role) => {
     return jwt.sign(
@@ -20,6 +20,7 @@ const transporter = nodemailer.createTransport({
         pass: process.env.EMAIL_PASSWORD
     }
 });
+
 transporter.verify((error, success) => {
     if (error) {
         console.error("EMAIL TEST ERROR:", error);
@@ -191,9 +192,9 @@ exports.forgotPassword = async (req, res) => {
 
         console.log("ABOUT TO SEND EMAIL");
 
-        const info = await transporter.sendMail({
-            from: process.env.EMAIL_USER,
-            to: user.email,
+        const { data, error } = await resend.emails.send({
+            from: "Healthcare Manager <onboarding@resend.dev>",
+            to: [user.email],
             subject: "Healthcare Manager - Password Reset",
             html: `
                 <h2>Password Reset</h2>
@@ -233,7 +234,15 @@ exports.forgotPassword = async (req, res) => {
             `
         });
 
-        console.log("EMAIL SENT:", info.messageId);
+        if (error) {
+            console.error("RESEND ERROR:", error);
+
+            return res.status(500).json({
+                message: "Unable to send password reset email"
+            });
+        }
+
+        console.log("EMAIL SENT:", data.id);
 
         res.status(200).json({
             message:
