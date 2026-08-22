@@ -28,13 +28,15 @@ function ForgotPassword() {
         }
       );
 
-      const data = await response.json();
+      const text = await response.text();
 
-      if (!response.ok) {
-        throw new Error(
-          data.message || "Failed to process request"
-        );
-      }
+console.log("SERVER RESPONSE:", text);
+
+if (!response.ok) {
+    throw new Error(
+        text || "Failed to process request"
+    );
+}
 
       setMessage(
         "If an account exists with this email, a password reset link has been sent."
