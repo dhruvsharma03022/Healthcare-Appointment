@@ -178,7 +178,7 @@ exports.forgotPassword = async (req, res) => {
         console.log("USER SAVED");
 
         const resetLink =
-            `https://healthcare-manager.vercel.app/reset-password/${resetToken}`;
+            `https://healthcare-appointment-nine.vercel.app/reset-password/${resetToken}`;
 
         console.log("ABOUT TO SEND EMAIL");
 
