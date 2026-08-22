@@ -2,7 +2,6 @@ const User = require("../models/User");
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
 const crypto = require("crypto");
-const { Resend } = require("resend");
 
 const generateToken = (id, role) => {
     return jwt.sign(
@@ -12,7 +11,35 @@ const generateToken = (id, role) => {
     );
 };
 
-const resend = new Resend(process.env.RESEND_API_KEY);
+const sendEmail = async ({ to, subject, html }) => {
+    const res = await fetch("https://api.brevo.com/v3/smtp/email", {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/json",
+            Accept: "application/json",
+            "api-key": process.env.BREVO_API_KEY
+        },
+        body: JSON.stringify({
+            sender: {
+                name: "Healthcare Manager",
+                email: process.env.BREVO_SENDER_EMAIL
+            },
+            to: [{ email: to }],
+            subject,
+            htmlContent: html
+        })
+    });
+
+    const data = await res.json();
+
+    if (!res.ok) {
+        throw new Error(
+            data.message || "Failed to send email via Brevo"
+        );
+    }
+
+    return data;
+};
 
 exports.register = async (req, res) => {
     try {
@@ -182,58 +209,58 @@ exports.forgotPassword = async (req, res) => {
 
         console.log("ABOUT TO SEND EMAIL");
 
-        const { data, error } = await resend.emails.send({
-            from: "Healthcare Manager <onboarding@resend.dev>",
-            to: [user.email],
-            subject: "Healthcare Manager - Password Reset",
-            html: `
-                <h2>Password Reset</h2>
+        try {
+            const data = await sendEmail({
+                to: user.email,
+                subject: "Healthcare Manager - Password Reset",
+                html: `
+                    <h2>Password Reset</h2>
 
-                <p>
-                    You requested a password reset
-                    for your Healthcare Manager account.
-                </p>
+                    <p>
+                        You requested a password reset
+                        for your Healthcare Manager account.
+                    </p>
 
-                <p>
-                    Click the button below to reset
-                    your password:
-                </p>
+                    <p>
+                        Click the button below to reset
+                        your password:
+                    </p>
 
-                <a
-                    href="${resetLink}"
-                    style="
-                        display:inline-block;
-                        padding:10px 20px;
-                        background:#2563eb;
-                        color:white;
-                        text-decoration:none;
-                        border-radius:5px;
-                    "
-                >
-                    Reset Password
-                </a>
+                    <a
+                        href="${resetLink}"
+                        style="
+                            display:inline-block;
+                            padding:10px 20px;
+                            background:#2563eb;
+                            color:white;
+                            text-decoration:none;
+                            border-radius:5px;
+                        "
+                    >
+                        Reset Password
+                    </a>
 
-                <p>
-                    This link will expire in 15 minutes.
-                </p>
+                    <p>
+                        This link will expire in 15 minutes.
+                    </p>
 
-                <p>
-                    If you did not request this,
-                    you can ignore this email.
-                </p>
-            `
-        });
+                    <p>
+                        If you did not request this,
+                        you can ignore this email.
+                    </p>
+                `
+            });
 
-        if (error) {
-            console.error("RESEND ERROR:", error);
+            console.log("EMAIL SENT:", data.messageId);
+
+        } catch (mailError) {
+            console.error("BREVO SEND ERROR:", mailError);
 
             return res.status(500).json({
                 message:
                     "Unable to send password reset email"
             });
         }
-
-        console.log("EMAIL SENT:", data.id);
 
         res.status(200).json({
             message:
@@ -332,4 +359,4 @@ exports.resetPassword = async (req, res) => {
                 "Unable to reset password"
         });
     }
-};
+};s
