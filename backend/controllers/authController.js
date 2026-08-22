@@ -20,6 +20,13 @@ const transporter = nodemailer.createTransport({
         pass: process.env.EMAIL_PASSWORD
     }
 });
+transporter.verify((error, success) => {
+    if (error) {
+        console.error("EMAIL TEST ERROR:", error);
+    } else {
+        console.log("EMAIL SERVER READY");
+    }
+});
 exports.register = async (req, res) => {
     try {
         const {
