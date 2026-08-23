@@ -1,4 +1,3 @@
-
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 
@@ -203,7 +202,13 @@ function DoctorDashboard() {
         );
       }
 
-      fetchAppointments();
+      setAppointments((prev) =>
+        prev.map((appointment) =>
+          appointment._id === appointmentId
+            ? { ...appointment, status }
+            : appointment
+        )
+      );
 
     } catch (error) {
 
@@ -638,4 +643,3 @@ function DoctorDashboard() {
 }
 
 export default DoctorDashboard;
-
