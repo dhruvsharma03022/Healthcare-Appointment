@@ -2,6 +2,7 @@ const User = require("../models/User");
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
 const crypto = require("crypto");
+const { sendEmail } = require("../services/emailService");
 
 const generateToken = (id, role) => {
     return jwt.sign(
@@ -9,36 +10,6 @@ const generateToken = (id, role) => {
         process.env.JWT_SECRET,
         { expiresIn: "7d" }
     );
-};
-
-const sendEmail = async ({ to, subject, html }) => {
-    const res = await fetch("https://api.brevo.com/v3/smtp/email", {
-        method: "POST",
-        headers: {
-            "Content-Type": "application/json",
-            Accept: "application/json",
-            "api-key": process.env.BREVO_API_KEY
-        },
-        body: JSON.stringify({
-            sender: {
-                name: "Healthcare Manager",
-                email: process.env.BREVO_SENDER_EMAIL
-            },
-            to: [{ email: to }],
-            subject,
-            htmlContent: html
-        })
-    });
-
-    const data = await res.json();
-
-    if (!res.ok) {
-        throw new Error(
-            data.message || "Failed to send email via Brevo"
-        );
-    }
-
-    return data;
 };
 
 exports.register = async (req, res) => {

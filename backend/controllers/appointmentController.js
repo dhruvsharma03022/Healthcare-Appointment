@@ -1,8 +1,76 @@
 const Appointment = require("../models/Appointment");
 const Doctor = require("../models/Doctor");
+const User = require("../models/User");
 const {
     generatePreVisitSummary
 } = require("../services/llmService");
+const { sendEmail } = require("../services/emailService");
+
+// Format a date/time for email content, in IST, matching the rest of the app
+const formatDateTime = (date) => {
+    return new Intl.DateTimeFormat("en-IN", {
+        timeZone: "Asia/Kolkata",
+        dateStyle: "medium",
+        timeStyle: "short"
+    }).format(new Date(date));
+};
+
+// Shared cancellation-email sender, used by both cancelAppointment
+// and updateAppointmentStatus (doctor-initiated cancel).
+// Never throws — email failures should not block the API response.
+const sendCancellationEmails = async (appointment) => {
+    try {
+        const [patientUser, doctorUser] = await Promise.all([
+            User.findById(appointment.patient),
+            Doctor.findById(appointment.doctor)
+        ]);
+
+        const formattedTime = formatDateTime(
+            appointment.appointmentTime
+        );
+
+        if (patientUser) {
+            await sendEmail({
+                to: patientUser.email,
+                subject: "Appointment Cancelled - Healthcare Manager",
+                html: `
+                    <h2>Appointment Cancelled</h2>
+                    <p>Hi ${patientUser.name},</p>
+                    <p>
+                        Your appointment with
+                        Dr. ${doctorUser?.name || "your doctor"}
+                        scheduled for <strong>${formattedTime}</strong>
+                        has been cancelled.
+                    </p>
+                `
+            });
+        }
+
+        if (doctorUser) {
+            await sendEmail({
+                to: doctorUser.email,
+                subject: "Appointment Cancelled - Healthcare Manager",
+                html: `
+                    <h2>Appointment Cancelled</h2>
+                    <p>Hi Dr. ${doctorUser.name},</p>
+                    <p>
+                        Your appointment with
+                        ${patientUser?.name || "the patient"}
+                        scheduled for <strong>${formattedTime}</strong>
+                        has been cancelled.
+                    </p>
+                `
+            });
+        }
+
+    } catch (emailError) {
+        console.error(
+            "Failed to send cancellation emails:",
+            emailError.message
+        );
+    }
+};
+
 exports.bookAppointment = async (req, res) => {
     try {
         const {
@@ -152,6 +220,69 @@ const [appointmentHours, appointmentMinutes] =
                 status: "BOOKED"
             });
 
+        // 9. Send booking confirmation emails (non-blocking)
+        try {
+            const patientUser =
+                await User.findById(patientId);
+
+            const formattedTime = formatDateTime(
+                appointment.appointmentTime
+            );
+
+            if (patientUser) {
+                await sendEmail({
+                    to: patientUser.email,
+                    subject:
+                        "Appointment Confirmed - Healthcare Manager",
+                    html: `
+                        <h2>Appointment Confirmed</h2>
+                        <p>Hi ${patientUser.name},</p>
+                        <p>
+                            Your appointment with
+                            Dr. ${doctor.name} (${doctor.specialization})
+                            is confirmed.
+                        </p>
+                        <p>
+                            <strong>Date & Time:</strong>
+                            ${formattedTime}
+                        </p>
+                        <p>
+                            If you need to cancel or reschedule,
+                            please do so from your dashboard.
+                        </p>
+                    `
+                });
+            }
+
+            await sendEmail({
+                to: doctor.email,
+                subject:
+                    "New Appointment Booked - Healthcare Manager",
+                html: `
+                    <h2>New Appointment Booked</h2>
+                    <p>Hi Dr. ${doctor.name},</p>
+                    <p>
+                        ${patientUser?.name || "A patient"}
+                        has booked an appointment with you.
+                    </p>
+                    <p>
+                        <strong>Date & Time:</strong>
+                        ${formattedTime}
+                    </p>
+                    <p>
+                        <strong>Symptoms:</strong>
+                        ${symptoms}
+                    </p>
+                `
+            });
+
+        } catch (emailError) {
+            console.error(
+                "Failed to send booking confirmation emails:",
+                emailError.message
+            );
+        }
+
         res.status(201).json({
             message:
                 "Appointment booked successfully",
@@ -238,6 +369,9 @@ exports.cancelAppointment = async (req, res) => {
         appointment.status = "CANCELLED";
 
         await appointment.save();
+
+        // Send cancellation emails (non-blocking)
+        await sendCancellationEmails(appointment);
 
         res.status(200).json({
             message:
@@ -338,6 +472,11 @@ exports.updateAppointmentStatus = async (req, res) => {
         appointment.status = status;
 
         await appointment.save();
+
+        // Send cancellation emails if the doctor cancelled it here
+        if (status === "CANCELLED") {
+            await sendCancellationEmails(appointment);
+        }
 
         res.status(200).json({
             message: "Appointment status updated successfully",
