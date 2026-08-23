@@ -24,7 +24,7 @@ The project has three roles: **Doctor**, **Patient**, and **Admin**.
 3. After login, you can view your upcoming, completed, and cancelled appointments, and add your leave dates — no slots will be available for the doctor on those dates.
 
 ### As an Admin
-1. Currently there is only one sample admin ID registered — please use that one.
+1. Currently there is only one sample admin ID registered please find credentials in **test credentials.txt** file .
 2. After logging in as admin, you can manage appointments and view hospital stats, such as number of appointments completed and appointments taken per doctor.
 3. An admin can add or delete doctors, and manage a doctor's shift start/end time and appointment slot duration.
 
@@ -181,22 +181,6 @@ Response:
   "doctorPerformance": [{ "_id": { "_id", "name" }, "totalAppointments": 0 }]
 }
 ```
-
-### Common Error Format
-
-```json
-{ "message": "Error description" }
-```
-
-| Status | Meaning |
-|---|---|
-| 400 | Bad request / validation error |
-| 401 | No/invalid token |
-| 403 | Role not authorized |
-| 404 | Resource not found |
-| 500 | Server error |
-
----
 
 ## Database Schema
 
@@ -408,7 +392,7 @@ The Healthcare Appointment System follows a client-server architecture using Rea
 ### How key issues were handled
 
 **1. Gemini rate-limit handling**
-Groq's API is used as a fail-over for pre-visit summary generation — if a Gemini request errors out, the request is forwarded to Groq. The same fail-over pattern applies to post-visit summaries.
+Groq's API is used as a fail-over for pre-visit summary generation if a Gemini request errors out, the request is forwarded to Groq. The same fail-over pattern applies to post-visit summaries.
 
 **2. Double-booking prevention**
 Before creating an appointment, the backend checks whether another `BOOKED` appointment already exists for the selected doctor and time slot.
@@ -435,10 +419,10 @@ Available slots are generated dynamically using:
 - Existing booked appointments
 - Doctor leave dates
 
-Booked slots are removed from the generated availability list before being shown to patients, and past time slots are filtered out — ensuring patients only see valid appointment options.
+Booked slots are removed from the generated availability list before being shown to patients, and past time slots are filtered out ensuring patients only see valid appointment options.
 
 **5. Notification failure handling**
-Appointment creation is independent of notification delivery. If email notifications fail due to SMTP or third-party service outages, appointment data is still stored successfully. Notification errors are logged separately and don't affect appointment status — preventing user-facing failures caused by external services.
+Appointment creation is independent of notification delivery. If email notifications fail due to SMTP or third-party service outages, appointment data is still stored successfully. Notification errors are logged separately and don't affect appointment status preventing user-facing failures caused by external services.
 
 **6. Scalability**
 The architecture separates frontend, backend, database, and AI services, allowing each component to scale independently. MongoDB indexes, stateless Express APIs, and external AI services support future growth without major architectural changes.
