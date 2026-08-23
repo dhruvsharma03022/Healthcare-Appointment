@@ -1,5 +1,7 @@
 # Healthcare Appointment System
 
+## Hosted link=**https://healthcare-appointment-nine.vercel.app/**
+
 ## About the Project
 
 Healthcare Appointment System is a SaaS (Software as a Service) platform that helps a hospital or clinic manage its business by helping patients, doctors, and administration with appointments, prescriptions, and AI suggestions and helps administration manage doctors and patients.
@@ -21,7 +23,7 @@ The project has three roles: **Doctor**, **Patient**, and **Admin**.
 ### As a Doctor
 1. To start as a doctor, an admin must first create your doctor profile with your name, email, and phone number. The default password after creation is `123456`.
 2. Log in with the default credentials, then change your password using "Forgot Password" afterward.
-3. After login, you can view your upcoming, completed, and cancelled appointments, and add your leave dates — no slots will be available for the doctor on those dates.
+3. After login, you can view your upcoming, completed, and cancelled appointments, and add your leave dates no slots will be available for the doctor on those dates.
 
 ### As an Admin
 1. Currently there is only one sample admin ID registered please find credentials in **test credentials.txt** file .
