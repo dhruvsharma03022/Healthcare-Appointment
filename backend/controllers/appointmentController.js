@@ -46,11 +46,18 @@ exports.bookAppointment = async (req, res) => {
         }
 
         // 4. Check doctor's working hours
-        const appointmentHours =
-            appointmentDateTime.getHours();
+        const istTime = new Intl.DateTimeFormat(
+    "en-IN",
+    {
+        timeZone: "Asia/Kolkata",
+        hour: "2-digit",
+        minute: "2-digit",
+        hour12: false
+    }
+).format(appointmentDateTime);
 
-        const appointmentMinutes =
-            appointmentDateTime.getMinutes();
+const [appointmentHours, appointmentMinutes] =
+    istTime.split(":").map(Number);
 
         const appointmentTotalMinutes =
             appointmentHours * 60 +
