@@ -126,46 +126,32 @@ const [appointmentHours, appointmentMinutes] =
         }
 
         // 7. Generate PRE-VISIT summary
-        // Create appointment immediately
-const appointment =
-    await Appointment.create({
-        patient: patientId,
-        doctor: doctorId,
-        appointmentTime:
-            new Date(appointmentTime),
-        symptoms,
-        status: "BOOKED"
-    });
+        let preVisitSummary = null;
 
-// Generate summary in background
-generatePreVisitSummary(symptoms)
-    .then(async (summary) => {
+        try {
+            preVisitSummary =
+                await generatePreVisitSummary(
+                    symptoms
+                );
+        } catch (error) {
+            console.error(
+                "Pre-visit summary generation failed:",
+                error.message
+            );
+        }
 
-        appointment.preVisitSummary =
-            summary;
+        // 8. Create appointment
+        const appointment =
+            await Appointment.create({
+                patient: patientId,
+                doctor: doctorId,
+                appointmentTime:
+                    new Date(appointmentTime),
+                symptoms,
+                preVisitSummary,
+                status: "BOOKED"
+            });
 
-        await appointment.save();
-
-        console.log(
-            "Pre-visit summary generated"
-        );
-
-    })
-    .catch((error) => {
-
-        console.error(
-            "Pre-visit summary generation failed:",
-            error.message
-        );
-
-    });
-
-// Return success immediately
-res.status(201).json({
-    message:
-        "Appointment booked successfully",
-    appointment
-});
         res.status(201).json({
             message:
                 "Appointment booked successfully",
