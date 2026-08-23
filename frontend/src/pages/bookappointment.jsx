@@ -12,6 +12,7 @@ export default function BookAppointment() {
   const [message, setMessage] = useState("");
   const [loadingSlots, setLoadingSlots] = useState(false);
   const [bookingStep, setBookingStep] = useState("");
+  const [calendarLink, setCalendarLink] = useState("");
 
   // NEW: booking loading state
   const [booking, setBooking] = useState(false);
@@ -114,7 +115,7 @@ export default function BookAppointment() {
   try {
     setBooking(true);
     setMessage("");
-
+    setCalendarLink("");
     setBookingStep(
       "Checking doctor availability..."
     );
@@ -171,7 +172,33 @@ export default function BookAppointment() {
     setMessage(
       "Appointment booked successfully!"
     );
+    const start = new Date(appointmentTime);
 
+const end = new Date(
+  start.getTime() + 30 * 60000
+);
+
+const formatGoogleDate = (date) =>
+  date
+    .toISOString()
+    .replace(/[-:]/g, "")
+    .split(".")[0] + "Z";
+
+const selectedDoctor = doctors.find(
+  (d) => d._id === doctorId
+);
+
+const calendarUrl =
+  `https://calendar.google.com/calendar/render?action=TEMPLATE` +
+  `&text=${encodeURIComponent(
+    `Appointment with Dr. ${selectedDoctor?.name}`
+  )}` +
+  `&dates=${formatGoogleDate(start)}/${formatGoogleDate(end)}` +
+  `&details=${encodeURIComponent(
+    `Symptoms: ${symptoms}`
+  )}`;
+
+setCalendarLink(calendarUrl);
     setDoctorId("");
     setDate("");
     setTime("");
@@ -218,7 +245,16 @@ export default function BookAppointment() {
           {message}
         </p>
       )}
-
+      {calendarLink && (
+  <a
+    href={calendarLink}
+    target="_blank"
+    rel="noopener noreferrer"
+    className="calendar-btn"
+  >
+    📅 Add to Google Calendar
+  </a>
+)}
       <form
         className="book-form"
         onSubmit={handleSubmit}

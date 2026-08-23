@@ -1931,3 +1931,19 @@ button:focus-visible {
     transform: rotate(360deg);
   }
 }
+.calendar-btn {
+  display: inline-block;
+  margin: 15px 0 20px;
+  padding: 12px 20px;
+  background: #4285f4;
+  color: #fff;
+  text-decoration: none;
+  border-radius: 8px;
+  font-weight: 600;
+  transition: 0.3s;
+}
+
+.calendar-btn:hover {
+  transform: translateY(-2px);
+  opacity: 0.9;
+}
