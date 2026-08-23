@@ -2,7 +2,7 @@
 
 ## About the Project
 
-Healthcare Appointment System is a SaaS (Software as a Service) platform that helps a hospital or clinic manage its business by helping patients, doctors, and administration with appointments, prescriptions, and AI suggestions — and helps administration manage doctors and patients.
+Healthcare Appointment System is a SaaS (Software as a Service) platform that helps a hospital or clinic manage its business by helping patients, doctors, and administration with appointments, prescriptions, and AI suggestions and helps administration manage doctors and patients.
 
 The project has three roles: **Doctor**, **Patient**, and **Admin**.
 
