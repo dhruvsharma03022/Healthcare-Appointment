@@ -11,6 +11,7 @@ export default function BookAppointment() {
   const [availableSlots, setAvailableSlots] = useState([]);
   const [message, setMessage] = useState("");
   const [loadingSlots, setLoadingSlots] = useState(false);
+  const [bookingStep, setBookingStep] = useState("");
 
   // NEW: booking loading state
   const [booking, setBooking] = useState(false);
@@ -103,74 +104,115 @@ export default function BookAppointment() {
   }, [doctorId, date]);
 
   const handleSubmit = async (e) => {
-    e.preventDefault();
+  e.preventDefault();
 
-    if (!time) {
-      setMessage("Please select an available slot.");
-      return;
-    }
+  if (!time) {
+    setMessage("Please select an available slot.");
+    return;
+  }
 
-    try {
-      // NEW: start loading
-      setBooking(true);
-      setMessage("");
+  try {
+    setBooking(true);
+    setMessage("");
 
-      const token = localStorage.getItem("token");
+    setBookingStep(
+      "Checking doctor availability..."
+    );
 
-      const appointmentTime = new Date(
-        `${date}T${time}`
-      ).toISOString();
-
-      const res = await fetch(
-        `${API_URL}/appointments`,
-        {
-          method: "POST",
-
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${token}`,
-          },
-
-          body: JSON.stringify({
-            doctorId,
-            appointmentTime,
-            symptoms,
-          }),
-        }
+    setTimeout(() => {
+      setBookingStep(
+        "Generating AI pre-visit summary for doctor..."
       );
+    }, 1000);
 
-      const data = await res.json();
+    setTimeout(() => {
+      setBookingStep(
+        "Finalizing appointment..."
+      );
+    }, 3000);
 
-      if (!res.ok) {
-        throw new Error(
-          data.message || "Failed to book appointment"
-        );
+    const token = localStorage.getItem("token");
+
+    const appointmentTime = new Date(
+      `${date}T${time}`
+    ).toISOString();
+
+    const res = await fetch(
+      `${API_URL}/appointments`,
+      {
+        method: "POST",
+
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+
+        body: JSON.stringify({
+          doctorId,
+          appointmentTime,
+          symptoms,
+        }),
       }
+    );
 
-      setMessage(
-        "Appointment booked successfully!"
+    const data = await res.json();
+
+    if (!res.ok) {
+      throw new Error(
+        data.message ||
+        "Failed to book appointment"
       );
-
-      setDoctorId("");
-      setDate("");
-      setTime("");
-      setSymptoms("");
-      setAvailableSlots([]);
-
-    } catch (err) {
-      setMessage(err.message);
-
-    } finally {
-      // NEW: stop loading
-      setBooking(false);
     }
-  };
+
+    setBookingStep(
+      "Appointment booked successfully!"
+    );
+
+    setMessage(
+      "Appointment booked successfully!"
+    );
+
+    setDoctorId("");
+    setDate("");
+    setTime("");
+    setSymptoms("");
+    setAvailableSlots([]);
+
+  } catch (err) {
+
+    setMessage(err.message);
+
+  } finally {
+
+    setTimeout(() => {
+      setBooking(false);
+      setBookingStep("");
+    }, 1000);
+
+  }
+};
 
   return (
     <div className="book-container">
 
       <h2>Book Appointment</h2>
+      {booking && (
+  <div className="booking-status">
 
+    <div className="booking-spinner"></div>
+
+    <h3>Please wait...</h3>
+
+    <p>{bookingStep}</p>
+
+    <small>
+      We are preparing your appointment and
+      generating an AI pre-visit summary
+      for the doctor.
+    </small>
+
+  </div>
+)}
       {message && (
         <p className="message">
           {message}
